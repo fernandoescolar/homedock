@@ -1,0 +1,115 @@
+.grid-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  user-select: none;
+  touch-action: none; /* prevent scroll while dragging cells */
+  border-radius: 6px;
+}
+
+.grid-picker:focus-visible {
+  outline: 2px solid rgba(99, 179, 237, 0.95);
+  outline-offset: 2px;
+}
+
+/* ── Column labels ───────────────────────────────────────────── */
+.gp-col-labels {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  padding: 0 1px;
+}
+
+.gp-col-label {
+  font-size: 0.6rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1;
+}
+
+/* ── Cell grid ───────────────────────────────────────────────── */
+.gp-cells {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(8, 18px);
+  gap: 2px;
+}
+
+.gp-cell {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 2px;
+  cursor: crosshair;
+  transition: background 0.08s;
+}
+
+.gp-cell:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.gp-cell--sel {
+  background: rgba(99, 179, 237, 0.35);
+}
+
+.gp-cell--sel:hover {
+  background: rgba(99, 179, 237, 0.5);
+}
+
+.gp-cell--anchor {
+  background: rgba(99, 179, 237, 0.85);
+  border-radius: 3px;
+}
+
+/* ── Row navigation ──────────────────────────────────────────── */
+.gp-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.gp-nav__btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  width: 26px;
+  height: 22px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+  padding: 0;
+}
+
+.gp-nav__btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.gp-nav__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.gp-nav__label {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.38);
+  text-align: center;
+  flex: 1;
+}
+
+/* ── Info line ───────────────────────────────────────────────── */
+.gp-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+  justify-content: center;
+}
+
+.gp-info b {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 600;
+}

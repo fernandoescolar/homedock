@@ -1,0 +1,11 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Subtle dark overlay for legibility */
+  filter: brightness(0.85);
+  transition: background-image 0.6s ease, background-color 0.4s ease;
+}

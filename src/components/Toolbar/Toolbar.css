@@ -1,0 +1,163 @@
+.toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+}
+
+.toolbar__left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar__brand {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.toolbar__center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar__right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.toolbar__btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.toolbar__icon {
+  line-height: 1;
+}
+
+.toolbar__label {
+  line-height: 1;
+}
+
+.toolbar__btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.toolbar__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.toolbar__btn:focus-visible {
+  outline: 2px solid rgba(99, 179, 237, 0.95);
+  outline-offset: 2px;
+}
+
+.toolbar__btn--primary {
+  background: rgba(99, 179, 237, 0.25);
+  border-color: rgba(99, 179, 237, 0.5);
+}
+
+.toolbar__btn--primary:hover {
+  background: rgba(99, 179, 237, 0.4);
+}
+
+.toolbar__btn--mode {
+  min-width: 80px;
+}
+
+.toolbar__btn--active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 900px) {
+  .toolbar {
+    padding: 0 10px;
+    gap: 6px;
+    height: 50px;
+  }
+
+  .toolbar__brand {
+    font-size: 0.78rem;
+  }
+
+  .toolbar__right {
+    gap: 6px;
+  }
+
+  .toolbar__btn {
+    padding: 5px 9px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    height: 46px;
+    padding: 0 6px;
+    gap: 4px;
+  }
+
+  .toolbar__left {
+    flex: 0;
+    min-width: auto;
+  }
+
+  .toolbar--edit .toolbar__brand {
+    display: none;
+  }
+
+  .toolbar__center,
+  .toolbar__right {
+    gap: 4px;
+  }
+
+  .toolbar__right {
+    flex: 1;
+  }
+
+  .toolbar__btn {
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    border-radius: 7px;
+  }
+
+  .toolbar__label {
+    display: none;
+  }
+
+  .toolbar__btn--mode {
+    min-width: auto;
+  }
+}

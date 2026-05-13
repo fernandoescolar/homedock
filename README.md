@@ -1,6 +1,10 @@
 # Homedock
 
-Homedock is a modern personal homepage dashboard available to everyone at https://homedock.page, built with React + TypeScript + Vite with local-first persistence and Docker deployment support.
+Homedock is a personal homepage dashboard available to everyone at https://homedock.page.
+
+It helps you organize your daily web workflow in a single, customizable start page: quick links, clock, weather, RSS, and visual panels you can adapt to your own style. The product is designed to be fast, privacy-friendly, and practical for everyday use, with local-first persistence and portable JSON export/import.
+
+Whether you use it as your browser home, a team kiosk view, or your own command center, Homedock gives you a clean interface with responsive editing tools, mobile-ready layouts, and multiple background modes to match your setup.
 
 Desktop:
 
@@ -88,6 +92,12 @@ npm run preview
 
 ```bash
 docker compose up --build
+```
+
+Or pull the published image directly from GHCR:
+
+```bash
+docker pull ghcr.io/fernandoescolar/homedock:latest
 ```
 
 Default container URL: `http://localhost:8080`

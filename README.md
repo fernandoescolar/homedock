@@ -8,11 +8,11 @@ Whether you use it as your browser home, a team kiosk view, or your own command 
 
 Desktop:
 
-![Homedock screenshot](images/homedock-desktop-view-1.png)
+<img src="images/homedock-desktop-view-1.png" alt="Homedock screenshot" width="900" />
 
 Mobile:
 
-![Homedock mobile screenshot](images/homedock-mobile-1.png)
+<img src="images/homedock-mobile-1.png" alt="Homedock mobile screenshot" width="360" />
 
 ## Project status
 
@@ -44,24 +44,24 @@ Implemented:
 
 Edit mode with panel editor open:
 
-![Edit widget type](images/homedock-desktop-edit-widget-type.png)
+<img src="images/homedock-desktop-edit-widget-type.png" alt="Edit widget type" width="900" />
 
 Configuring widget:
 
-![Configuring rss widget](images/homedock-desktop-edit-rss.png)
+<img src="images/homedock-desktop-edit-rss.png" alt="Configuring rss widget" width="900" />
 
 Background settings:
 
-![Background settings](images/homedock-desktop-edit-background.png)
+<img src="images/homedock-desktop-edit-background.png" alt="Background settings" width="900" />
 
 
 Homedock on desktop:
 
-![Homedock desktop](images/homedock-desktop-view-1.png)
+<img src="images/homedock-desktop-view-1.png" alt="Homedock desktop" width="900" />
 
 Homedock on mobile:
 
-![Homedock mobile](images/homedock-mobile-2.png)
+<img src="images/homedock-mobile-2.png" alt="Homedock mobile" width="360" />
 
 
 

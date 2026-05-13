@@ -92,8 +92,7 @@ export function App() {
     dispatch({
       type: 'SET_BACKGROUND',
       payload: importPreview.background,
-    });
-    closeImportPreview();
+    });    closeImportPreview();
   }
 
   const handleFileChange = useCallback(
@@ -122,7 +121,6 @@ export function App() {
           const collisions = result.valid
             ? analyzePanelsForCollisions(panels)
             : [];
-
           setImportPreview({
             fileName: file.name,
             panels,

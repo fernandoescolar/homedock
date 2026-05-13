@@ -24,6 +24,7 @@ function migratePanel(raw: Record<string, unknown>, index: number): Panel {
     return {
       ...raw,
       showTitle: raw.showTitle ?? true,
+      openLinksInNewTab: raw.openLinksInNewTab ?? true,
       linkDisplay: raw.linkDisplay ?? 'list',
       widgetType: raw.widgetType ?? 'links',
       widgetConfig: typeof raw.widgetConfig === 'object' && raw.widgetConfig ? raw.widgetConfig : {},
@@ -42,6 +43,7 @@ function migratePanel(raw: Record<string, unknown>, index: number): Panel {
     colSpan: 4,
     rowSpan: 3,
     links: Array.isArray(raw.links) ? raw.links : [],
+    openLinksInNewTab: true,
     style: (raw.style as Panel['style']) ?? FALLBACK_STYLE,
     linkDisplay: (raw.linkDisplay as Panel['linkDisplay']) ?? 'list',
     widgetType: 'links',

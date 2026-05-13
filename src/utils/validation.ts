@@ -156,6 +156,9 @@ function validatePanel(p: unknown, index: number): string[] {
   if (panel.showTitle !== undefined && !isBoolean(panel.showTitle)) {
     errors.push(`${prefix}.showTitle must be a boolean`);
   }
+  if (panel.openLinksInNewTab !== undefined && !isBoolean(panel.openLinksInNewTab)) {
+    errors.push(`${prefix}.openLinksInNewTab must be a boolean`);
+  }
   if (!isNumber(panel.col)) errors.push(`${prefix}.col must be a number`);
   if (!isNumber(panel.row)) errors.push(`${prefix}.row must be a number`);
   if (!isNumber(panel.colSpan)) errors.push(`${prefix}.colSpan must be a number`);

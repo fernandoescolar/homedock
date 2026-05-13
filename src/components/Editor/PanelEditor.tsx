@@ -291,26 +291,37 @@ export function PanelEditor({ panel, panels, dispatch, onClose }: PanelEditorPro
           </div>
 
           {(panel.widgetType ?? 'links') === 'links' && (
-            <Field label="Link display">
-              <div className="pe-segment" role="group" aria-label="Link display mode">
-                <button
-                  type="button"
-                  className={`pe-segment__btn${(panel.linkDisplay ?? 'list') === 'list' ? ' pe-segment__btn--active' : ''}`}
-                  onClick={() => updatePanel({ linkDisplay: 'list' })}
-                  title="List — small icon + label in a row"
-                >
-                  ☰ List
-                </button>
-                <button
-                  type="button"
-                  className={`pe-segment__btn${(panel.linkDisplay ?? 'list') === 'grid' ? ' pe-segment__btn--active' : ''}`}
-                  onClick={() => updatePanel({ linkDisplay: 'grid' })}
-                  title="Grid — big icon with label below"
-                >
-                  ⊞ Grid
-                </button>
-              </div>
-            </Field>
+            <>
+              <Field label="Link display">
+                <div className="pe-segment" role="group" aria-label="Link display mode">
+                  <button
+                    type="button"
+                    className={`pe-segment__btn${(panel.linkDisplay ?? 'list') === 'list' ? ' pe-segment__btn--active' : ''}`}
+                    onClick={() => updatePanel({ linkDisplay: 'list' })}
+                    title="List — small icon + label in a row"
+                  >
+                    ☰ List
+                  </button>
+                  <button
+                    type="button"
+                    className={`pe-segment__btn${(panel.linkDisplay ?? 'list') === 'grid' ? ' pe-segment__btn--active' : ''}`}
+                    onClick={() => updatePanel({ linkDisplay: 'grid' })}
+                    title="Grid — big icon with label below"
+                  >
+                    ⊞ Grid
+                  </button>
+                </div>
+              </Field>
+
+              <label className="pe-check">
+                <input
+                  type="checkbox"
+                  checked={panel.openLinksInNewTab ?? true}
+                  onChange={(e) => updatePanel({ openLinksInNewTab: e.target.checked })}
+                />
+                <span>Open links in a new browser tab</span>
+              </label>
+            </>
           )}
         </section>
 

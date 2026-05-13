@@ -70,6 +70,7 @@ export function reducer(state: AppState, action: Action): AppState {
             colSpan: 4,
             rowSpan: 3,
             links: [],
+            openLinksInNewTab: true,
             style: { ...DEFAULT_STYLE },
             linkDisplay: 'list' as const,
             widgetType: 'links',

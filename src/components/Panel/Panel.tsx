@@ -12,6 +12,7 @@ interface PanelProps {
   isSelected: boolean;
   onSelect: () => void;
   dispatch: Dispatch<Action>;
+  openLinksInNewTab?: boolean;
 }
 
 export function Panel({
@@ -20,6 +21,7 @@ export function Panel({
   isSelected,
   onSelect,
   dispatch,
+  openLinksInNewTab,
 }: PanelProps) {
   const showTitle = panel.showTitle ?? true;
   const showHeader = isEdit || showTitle;
@@ -73,7 +75,13 @@ export function Panel({
       {(panel.widgetType ?? 'links') === 'links' ? (
         <div className={`panel__links panel__links--${panel.linkDisplay ?? 'list'}`}>
           {panel.links.map((link) => (
-            <LinkItem key={link.id} link={link} isEdit={isEdit} display={panel.linkDisplay ?? 'list'} />
+            <LinkItem
+              key={link.id}
+              link={link}
+              isEdit={isEdit}
+              display={panel.linkDisplay ?? 'list'}
+              openInNewTab={openLinksInNewTab ?? panel.openLinksInNewTab ?? true}
+            />
           ))}
           {panel.links.length === 0 && isEdit && (
             <p className="panel__empty">No links · open editor to add</p>

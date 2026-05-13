@@ -7,9 +7,10 @@ interface LinkItemProps {
   link: Link;
   isEdit: boolean;
   display?: LinkDisplay;
+  openInNewTab: boolean;
 }
 
-export function LinkItem({ link, isEdit, display = 'list' }: LinkItemProps) {
+export function LinkItem({ link, isEdit, display = 'list', openInNewTab }: LinkItemProps) {
   const [faviconSrc, setFaviconSrc] = useState<string>('');
 
   useEffect(() => {
@@ -62,8 +63,8 @@ export function LinkItem({ link, isEdit, display = 'list' }: LinkItemProps) {
       <a
         className="link-item link-item--grid"
         href={link.url}
-        target="_blank"
-        rel="noopener noreferrer"
+        target={openInNewTab ? '_blank' : undefined}
+        rel={openInNewTab ? 'noopener noreferrer' : undefined}
         title={link.url}
       >
         {bigIcon}
@@ -88,8 +89,8 @@ export function LinkItem({ link, isEdit, display = 'list' }: LinkItemProps) {
     <a
       className="link-item"
       href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={openInNewTab ? '_blank' : undefined}
+      rel={openInNewTab ? 'noopener noreferrer' : undefined}
       title={link.url}
     >
       {smallIcon}

@@ -71,6 +71,8 @@ export interface Panel {
   /** Rows to span (1–N) */
   rowSpan: number;
   links: Link[];
+  /** Whether this panel's links open in a new tab (view mode) */
+  openLinksInNewTab?: boolean;
   style: PanelStyle;
   /** How links are displayed inside the panel */
   linkDisplay: LinkDisplay;

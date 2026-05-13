@@ -185,7 +185,7 @@
 
 @media (max-width: 640px) {
   .app {
-    --toolbar-height: 46px;
+    --toolbar-height: 52px;
     --grid-gap: 8px;
     --grid-cols: 1; /* Single column on mobile */
   }

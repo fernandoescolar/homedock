@@ -386,18 +386,63 @@
   }
 
   .pe-header {
-    padding: 10px 14px;
+    padding: 12px 16px;
+  }
+
+  .pe-header__close {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1.5rem;
   }
 
   .pe-body {
-    padding-bottom: 20px;
+    padding-bottom: 24px;
   }
 
   .pe-section {
-    padding: 10px 14px;
+    padding: 12px 16px;
+    gap: 12px;
   }
 
   .pe-row {
     grid-template-columns: 1fr;
+  }
+
+  .pe-field__label,
+  .pe-check,
+  .pe-layout-error,
+  .pe-note,
+  .pe-segment__btn,
+  .pe-btn {
+    font-size: 0.9rem;
+  }
+
+  .pe-input {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  .pe-input--sm {
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+
+  .pe-color {
+    width: 48px;
+    height: 40px;
+  }
+
+  .pe-segment__btn,
+  .pe-btn {
+    min-height: 42px;
+    padding: 10px 12px;
+  }
+
+  .pe-link__delete {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1.2rem;
   }
 }

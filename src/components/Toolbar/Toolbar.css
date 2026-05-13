@@ -124,9 +124,9 @@
 
 @media (max-width: 640px) {
   .toolbar {
-    height: 46px;
-    padding: 0 6px;
-    gap: 4px;
+    height: 52px;
+    padding: 0 8px;
+    gap: 6px;
   }
 
   .toolbar__left {
@@ -140,7 +140,7 @@
 
   .toolbar__center,
   .toolbar__right {
-    gap: 4px;
+    gap: 6px;
   }
 
   .toolbar__right {
@@ -148,9 +148,10 @@
   }
 
   .toolbar__btn {
-    padding: 4px 6px;
-    font-size: 0.72rem;
-    border-radius: 7px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    border-radius: 9px;
   }
 
   .toolbar__label {
@@ -159,5 +160,9 @@
 
   .toolbar__btn--mode {
     min-width: auto;
+  }
+
+  .toolbar__icon {
+    font-size: 0.95rem;
   }
 }

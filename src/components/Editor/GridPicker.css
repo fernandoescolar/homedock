@@ -113,3 +113,37 @@
   color: rgba(255, 255, 255, 0.88);
   font-weight: 600;
 }
+
+@media (max-width: 640px) {
+  .grid-picker {
+    gap: 8px;
+  }
+
+  .gp-col-labels {
+    gap: 3px;
+  }
+
+  .gp-col-label {
+    font-size: 0.68rem;
+  }
+
+  .gp-cells {
+    grid-template-rows: repeat(8, 24px);
+    gap: 3px;
+  }
+
+  .gp-nav {
+    gap: 8px;
+  }
+
+  .gp-nav__btn {
+    width: 32px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+
+  .gp-nav__label,
+  .gp-info {
+    font-size: 0.78rem;
+  }
+}

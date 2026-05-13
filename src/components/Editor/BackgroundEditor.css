@@ -194,6 +194,51 @@
     border-top-right-radius: 14px;
     animation: background-editor-enter-bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
+
+  .be-header {
+    padding: 12px 16px;
+  }
+
+  .be-header__close {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1.35rem;
+  }
+
+  .be-body {
+    padding-bottom: 24px;
+  }
+
+  .be-section {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .be-segment {
+    gap: 8px;
+  }
+
+  .be-field__label,
+  .be-note,
+  .be-btn,
+  .be-segment__btn {
+    font-size: 0.92rem;
+  }
+
+  .be-segment__btn,
+  .be-btn {
+    min-height: 42px;
+    padding: 10px 12px;
+  }
+
+  .be-color {
+    width: 48px;
+    height: 40px;
+  }
+
+  .be-range {
+    min-height: 28px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

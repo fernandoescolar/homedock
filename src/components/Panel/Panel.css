@@ -6,6 +6,7 @@
   transition: box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .panel--edit {
@@ -31,6 +32,7 @@
   gap: 8px;
   padding: 10px 12px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: move;
 }
 
 .panel__title {
@@ -67,6 +69,60 @@
 .panel__btn-delete:hover {
   opacity: 1;
   background: rgba(255, 80, 80, 0.7);
+}
+
+.panel__resize {
+  position: absolute;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.panel--edit:hover .panel__resize,
+.panel--selected .panel__resize {
+  opacity: 1;
+}
+
+.panel__resize--left,
+.panel__resize--right {
+  top: 8px;
+  bottom: 8px;
+  width: 8px;
+}
+
+.panel__resize--left {
+  left: 0;
+  cursor: ew-resize;
+}
+
+.panel__resize--right {
+  right: 0;
+  cursor: ew-resize;
+}
+
+.panel__resize--top,
+.panel__resize--bottom {
+  left: 8px;
+  right: 8px;
+  height: 8px;
+}
+
+.panel__resize--top {
+  top: 0;
+  cursor: ns-resize;
+}
+
+.panel__resize--bottom {
+  bottom: 0;
+  cursor: ns-resize;
+}
+
+.panel__resize::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 999px;
+  background: rgba(99, 179, 237, 0.42);
 }
 
 /* ── Links list ────────────────────────────────────────────────── */

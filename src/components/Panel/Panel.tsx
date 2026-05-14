@@ -1,3 +1,4 @@
+import { useCallback, useRef } from 'react';
 import type { Panel as PanelType } from '../../types';
 import type { Action } from '../../store/reducer';
 import type { Dispatch } from 'react';
@@ -6,6 +7,25 @@ import { hexToRgba } from '../../utils/color';
 import { WidgetContent } from './WidgetContent';
 import './Panel.css';
 
+interface PanelPlacementSnapshot {
+  col: number;
+  row: number;
+  colSpan: number;
+  rowSpan: number;
+}
+
+type GestureKind = 'move' | 'resize';
+export type PanelResizeEdge = 'left' | 'right' | 'top' | 'bottom';
+
+interface ActiveGesture {
+  pointerId: number;
+  kind: GestureKind;
+  edge?: PanelResizeEdge;
+  startX: number;
+  startY: number;
+  start: PanelPlacementSnapshot;
+}
+
 interface PanelProps {
   panel: PanelType;
   isEdit: boolean;
@@ -13,6 +33,14 @@ interface PanelProps {
   onSelect: () => void;
   dispatch: Dispatch<Action>;
   openLinksInNewTab?: boolean;
+  onMoveDrag: (id: string, start: PanelPlacementSnapshot, dx: number, dy: number) => void;
+  onResizeDrag: (
+    id: string,
+    start: PanelPlacementSnapshot,
+    edge: PanelResizeEdge,
+    dx: number,
+    dy: number
+  ) => void;
 }
 
 export function Panel({
@@ -22,9 +50,81 @@ export function Panel({
   onSelect,
   dispatch,
   openLinksInNewTab,
+  onMoveDrag,
+  onResizeDrag,
 }: PanelProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const activeGestureRef = useRef<ActiveGesture | null>(null);
+
   const showTitle = panel.showTitle ?? true;
   const showHeader = isEdit || showTitle;
+
+  const start = {
+    col: panel.col,
+    row: panel.row,
+    colSpan: panel.colSpan,
+    rowSpan: panel.rowSpan,
+  };
+
+  const beginGesture = useCallback(
+    (e: React.PointerEvent<HTMLElement>, kind: GestureKind, edge?: PanelResizeEdge) => {
+      if (!isEdit) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const panelElement = panelRef.current;
+      if (!panelElement) return;
+
+      panelElement.setPointerCapture(e.pointerId);
+      activeGestureRef.current = {
+        pointerId: e.pointerId,
+        kind,
+        edge,
+        startX: e.clientX,
+        startY: e.clientY,
+        start,
+      };
+      onSelect();
+    },
+    [isEdit, onSelect, start]
+  );
+
+  const endGesture = useCallback((pointerId: number) => {
+    const panelElement = panelRef.current;
+    if (panelElement?.hasPointerCapture(pointerId)) {
+      panelElement.releasePointerCapture(pointerId);
+    }
+    activeGestureRef.current = null;
+  }, []);
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const active = activeGestureRef.current;
+      if (!active || active.pointerId !== e.pointerId) return;
+
+      const dx = e.clientX - active.startX;
+      const dy = e.clientY - active.startY;
+
+      if (active.kind === 'move') {
+        onMoveDrag(panel.id, active.start, dx, dy);
+        return;
+      }
+
+      if (active.edge) {
+        onResizeDrag(panel.id, active.start, active.edge, dx, dy);
+      }
+    },
+    [onMoveDrag, onResizeDrag, panel.id]
+  );
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const active = activeGestureRef.current;
+      if (!active || active.pointerId !== e.pointerId) return;
+      endGesture(e.pointerId);
+    },
+    [endGesture]
+  );
 
   const panelStyle: React.CSSProperties = {
     gridColumn: `${panel.col} / span ${panel.colSpan}`,
@@ -39,6 +139,7 @@ export function Panel({
 
   return (
     <div
+      ref={panelRef}
       className={[
         'panel',
         isEdit ? 'panel--edit' : '',
@@ -48,10 +149,16 @@ export function Panel({
         .join(' ')}
       style={panelStyle}
       onClick={isEdit ? onSelect : undefined}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       {/* Title bar */}
       {showHeader && (
-        <div className="panel__handle">
+        <div
+          className="panel__handle"
+          onPointerDown={isEdit ? (e) => beginGesture(e, 'move') : undefined}
+        >
           {showTitle && panel.title && (
             <span className="panel__title">{panel.title}</span>
           )}
@@ -69,6 +176,31 @@ export function Panel({
             </button>
           )}
         </div>
+      )}
+
+      {isEdit && (
+        <>
+          <div
+            className="panel__resize panel__resize--left"
+            onPointerDown={(e) => beginGesture(e, 'resize', 'left')}
+            aria-hidden="true"
+          />
+          <div
+            className="panel__resize panel__resize--right"
+            onPointerDown={(e) => beginGesture(e, 'resize', 'right')}
+            aria-hidden="true"
+          />
+          <div
+            className="panel__resize panel__resize--top"
+            onPointerDown={(e) => beginGesture(e, 'resize', 'top')}
+            aria-hidden="true"
+          />
+          <div
+            className="panel__resize panel__resize--bottom"
+            onPointerDown={(e) => beginGesture(e, 'resize', 'bottom')}
+            aria-hidden="true"
+          />
+        </>
       )}
 
       {/* Body */}

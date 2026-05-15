@@ -1,9 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Panel } from '../../types';
+import type { Dispatch } from 'react';
+import type { Action } from '../../store/reducer';
+import { NotesWidget } from './widgets/NotesWidget';
+import { CalculatorWidget } from './widgets/CalculatorWidget';
+import { CalendarWidget } from './widgets/CalendarWidget';
+import { TodoWidget } from './widgets/TodoWidget';
+import { StockTickerWidget } from './widgets/StockTickerWidget';
 
 type WidgetProps = {
   panel: Panel;
   isEdit: boolean;
+  dispatch: Dispatch<Action>;
 };
 
 type WeatherData = {
@@ -103,6 +111,7 @@ function ClockWidget({ panel }: WidgetProps) {
   const cfg = panel.widgetConfig.clock;
   const mode = cfg?.mode ?? 'digital';
   const timeZone = cfg?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const hourFormat = cfg?.hourFormat ?? 'auto';
 
   const textStyle = makeTextStyle(cfg?.textColor, cfg?.textBorderColor);
   const digitalStyle: React.CSSProperties = {
@@ -116,14 +125,19 @@ function ClockWidget({ panel }: WidgetProps) {
   }, []);
 
   const formatted = useMemo(
-    () =>
-      new Intl.DateTimeFormat([], {
+    () => {
+      const hourOptions: Intl.DateTimeFormatOptions =
+        hourFormat === 'auto' ? {} : { hour12: hourFormat === '12h' };
+
+      return new Intl.DateTimeFormat([], {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         timeZone,
-      }).format(now),
-    [now, timeZone]
+        ...hourOptions,
+      }).format(now);
+    },
+    [now, timeZone, hourFormat]
   );
 
   const clockParts = useMemo(() => getClockParts(now, timeZone), [now, timeZone]);
@@ -193,6 +207,7 @@ function ClockWidget({ panel }: WidgetProps) {
 function WeatherWidget({ panel, isEdit }: WidgetProps) {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const cfg = panel.widgetConfig.weather;
 
@@ -225,12 +240,31 @@ function WeatherWidget({ panel, isEdit }: WidgetProps) {
   const longitude = coords?.lon ?? cfg?.longitude;
 
   useEffect(() => {
+    function updateOnlineState() {
+      setIsOffline(!navigator.onLine);
+    }
+
+    window.addEventListener('online', updateOnlineState);
+    window.addEventListener('offline', updateOnlineState);
+    return () => {
+      window.removeEventListener('online', updateOnlineState);
+      window.removeEventListener('offline', updateOnlineState);
+    };
+  }, []);
+
+  useEffect(() => {
     async function run() {
       if (!latitude || !longitude) {
         setData(null);
         setError(isEdit ? 'Set latitude and longitude in editor or enable geolocation.' : 'Weather is not configured yet.');
         return;
       }
+
+      if (!navigator.onLine && !data) {
+        setError(null);
+        return;
+      }
+
       try {
         setError(null);
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weather_code`;
@@ -245,6 +279,10 @@ function WeatherWidget({ panel, isEdit }: WidgetProps) {
           weatherCode: json.current?.weather_code ?? 0,
         });
       } catch {
+        if (!navigator.onLine && !data) {
+          setError(null);
+          return;
+        }
         setError('Failed to load weather data.');
       }
     }
@@ -253,9 +291,26 @@ function WeatherWidget({ panel, isEdit }: WidgetProps) {
   }, [latitude, longitude, isEdit]);
 
   return (
-    <div className="widget widget--weather">
+    <div
+      className={[
+        'widget',
+        'widget--weather',
+        'widget--fade-in',
+        data || error ? 'widget--loaded' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="widget__title" style={textStyle}>{cfg?.city ? cfg.city : ''}</div>
-      {error ? (
+      {isOffline && data && (
+        <p className="widget-cached" role="status" aria-live="polite">Offline: showing cached weather data</p>
+      )}
+      {!data && isOffline ? (
+        <div className="widget-offline widget-offline--weather" role="status" aria-live="polite">
+          <p className="widget-offline__title">No connection</p>
+          <p className="widget-offline__text">Weather will update when internet is back.</p>
+        </div>
+      ) : error ? (
         <p className="widget__error">{error}</p>
       ) : data ? (
         <>
@@ -359,7 +414,21 @@ async function fetchViaRss2Json(url: string, maxItems: number): Promise<RssItem[
 function RssWidget({ panel, isEdit }: WidgetProps) {
   const [items, setItems] = useState<RssItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const cfg = panel.widgetConfig.rss;
+
+  useEffect(() => {
+    function updateOnlineState() {
+      setIsOffline(!navigator.onLine);
+    }
+
+    window.addEventListener('online', updateOnlineState);
+    window.addEventListener('offline', updateOnlineState);
+    return () => {
+      window.removeEventListener('online', updateOnlineState);
+      window.removeEventListener('offline', updateOnlineState);
+    };
+  }, []);
 
   useEffect(() => {
     async function run() {
@@ -369,6 +438,11 @@ function RssWidget({ panel, isEdit }: WidgetProps) {
       if (!url) {
         setItems([]);
         setError(isEdit ? 'Set feed URL in editor.' : 'RSS feed is not configured yet.');
+        return;
+      }
+
+      if (!navigator.onLine && items.length === 0) {
+        setError(null);
         return;
       }
 
@@ -385,6 +459,10 @@ function RssWidget({ panel, isEdit }: WidgetProps) {
         const jsonFallback = await fetchViaRss2Json(url, maxItems);
         setItems(jsonFallback);
       } catch {
+        if (!navigator.onLine && items.length === 0) {
+          setError(null);
+          return;
+        }
         setError('Failed to load RSS feed. Try another feed URL or check availability.');
       }
     }
@@ -393,8 +471,25 @@ function RssWidget({ panel, isEdit }: WidgetProps) {
   }, [cfg?.feedUrl, cfg?.maxItems, isEdit]);
 
   return (
-    <div className="widget widget--rss">
-      {error ? (
+    <div
+      className={[
+        'widget',
+        'widget--rss',
+        'widget--fade-in',
+        items.length > 0 || error ? 'widget--loaded' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {isOffline && items.length > 0 && !error && (
+        <p className="widget-cached" role="status" aria-live="polite">Offline: showing cached RSS items</p>
+      )}
+      {!error && items.length === 0 && isOffline ? (
+        <div className="widget-offline widget-offline--rss" role="status" aria-live="polite">
+          <p className="widget-offline__title">No connection</p>
+          <p className="widget-offline__text">RSS feed will refresh automatically when online.</p>
+        </div>
+      ) : error ? (
         <p className="widget__error">{error}</p>
       ) : (
         <ul className="widget__list">
@@ -417,5 +512,10 @@ export function WidgetContent(props: WidgetProps) {
   if (type === 'clock') return <ClockWidget {...props} />;
   if (type === 'weather') return <WeatherWidget {...props} />;
   if (type === 'rss') return <RssWidget {...props} />;
+  if (type === 'notes') return <NotesWidget {...props} />;
+  if (type === 'calculator') return <CalculatorWidget panel={props.panel} />;
+  if (type === 'calendar') return <CalendarWidget panel={props.panel} />;
+  if (type === 'todo') return <TodoWidget panel={props.panel} isEdit={props.isEdit} dispatch={props.dispatch} />;
+  if (type === 'stock') return <StockTickerWidget panel={props.panel} />;
   return null;
 }

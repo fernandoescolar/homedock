@@ -21,11 +21,21 @@ export interface PanelStyle {
 
 export type LinkDisplay = 'list' | 'grid';
 
-export type WidgetType = 'links' | 'clock' | 'weather' | 'rss';
+export type WidgetType =
+  | 'links'
+  | 'clock'
+  | 'weather'
+  | 'rss'
+  | 'notes'
+  | 'calculator'
+  | 'calendar'
+  | 'todo'
+  | 'stock';
 
 export interface ClockWidgetConfig {
   mode: 'digital' | 'analog';
   timeZone: string;
+  hourFormat?: 'auto' | '24h' | '12h';
   showTimeZone?: boolean;
   /** Font size in rem for digital mode, default ~3 */
   fontSize?: number;
@@ -51,10 +61,45 @@ export interface RssWidgetConfig {
   maxItems: number;
 }
 
+export interface NotesWidgetConfig {
+  text: string;
+  fontSize: number;
+}
+
+export interface CalculatorWidgetConfig {
+  precision: number;
+}
+
+export interface CalendarWidgetConfig {
+  weekStartsOnMonday: boolean;
+  locale?: string;
+}
+
+export interface TodoItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface TodoWidgetConfig {
+  items: TodoItem[];
+  showCompleted: boolean;
+}
+
+export interface StockWidgetConfig {
+  symbols: string[];
+  refreshIntervalMinutes: number;
+}
+
 export interface WidgetConfig {
   clock?: ClockWidgetConfig;
   weather?: WeatherWidgetConfig;
   rss?: RssWidgetConfig;
+  notes?: NotesWidgetConfig;
+  calculator?: CalculatorWidgetConfig;
+  calendar?: CalendarWidgetConfig;
+  todo?: TodoWidgetConfig;
+  stock?: StockWidgetConfig;
 }
 
 export interface Panel {

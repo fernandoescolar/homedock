@@ -1,5 +1,5 @@
 .app {
-  --toolbar-height: 52px;
+  --toolbar-height: 56px;
   --grid-cols: 12;
   --grid-gap: 16px;
   --sidebar-width: 300px;
@@ -11,6 +11,40 @@
 
 .app--view {
   --toolbar-height: 0px;
+}
+
+.app__skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1200;
+  transform: translateY(-160%);
+  background: #ffffff;
+  color: #0e1524;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.app__skip-link:focus {
+  transform: translateY(0%);
+}
+
+.app__notice {
+  position: fixed;
+  right: 14px;
+  top: calc(var(--toolbar-height) + 10px);
+  z-index: 960;
+  max-width: min(420px, 90vw);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(170, 205, 255, 0.4);
+  background: rgba(12, 20, 34, 0.92);
+  color: rgba(238, 245, 255, 0.95);
+  font-size: 0.82rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* ── Canvas ───────────────────────────────────────────────────── */
@@ -113,6 +147,82 @@
 }
 
 
+/* ── Import source dialog ─────────────────────────────────── */
+.import-source {
+  position: fixed;
+  inset: 0;
+  z-index: 890;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.import-source__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(8, 10, 16, 0.62);
+}
+
+.import-source__card {
+  position: relative;
+  width: min(640px, 96vw);
+  max-height: min(76vh, 700px);
+  overflow: auto;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(18, 21, 30, 0.96);
+  color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.import-source__title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.import-source__meta {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.import-source__actions {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.import-source__url-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.import-source__url-input {
+  min-height: 38px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 0 10px;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+
+.import-source__url-input::placeholder {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.import-source__url-input:focus-visible {
+  outline: 2px solid rgba(99, 179, 237, 0.95);
+  outline-offset: 2px;
+}
+
+
 /* ── Import preview dialog ─────────────────────────────────── */
 .import-preview {
   position: fixed;
@@ -195,7 +305,7 @@
 /* ── Responsive breakpoints ──────────────────────────────────── */
 @media (max-width: 900px) {
   .app {
-    --toolbar-height: 50px;
+    --toolbar-height: 54px;
     --grid-gap: 12px;
   }
 
@@ -206,7 +316,7 @@
 
 @media (max-width: 640px) {
   .app {
-    --toolbar-height: 52px;
+    --toolbar-height: 56px;
     --grid-gap: 8px;
     --grid-cols: 1; /* Single column on mobile */
   }
@@ -239,8 +349,33 @@
     font-size: 1.5rem;
   }
 
+  .app__notice {
+    right: 8px;
+    left: 8px;
+    max-width: none;
+    top: calc(var(--toolbar-height) + 8px);
+  }
+
   .import-preview {
     padding: 8px;
+  }
+
+  .import-source {
+    padding: 8px;
+  }
+
+  .import-source__card {
+    width: 100%;
+    max-height: 84vh;
+    padding: 14px;
+  }
+
+  .import-source__url-row {
+    grid-template-columns: 1fr;
+  }
+
+  .import-source__url-row .toolbar__btn {
+    width: 100%;
   }
 
   .import-preview__card {

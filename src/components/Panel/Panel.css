@@ -3,10 +3,19 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   overflow: hidden;
   min-height: 80px;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.16s ease, opacity 0.16s ease;
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+.panel--dragging {
+  transform: scale(1.012);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.48), 0 0 0 2px rgba(99, 179, 237, 0.45);
+}
+
+.panel--resizing {
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.44), 0 0 0 2px rgba(99, 179, 237, 0.38);
 }
 
 .panel--edit {
@@ -155,6 +164,17 @@
   gap: 8px;
 }
 
+.widget--fade-in {
+  opacity: 0.55;
+  transform: translateY(3px);
+}
+
+.widget--fade-in.widget--loaded {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
 .widget__title {
   font-size: 0.7rem;
   font-weight: 700;
@@ -178,6 +198,53 @@
   margin: 0;
   color: rgba(255, 170, 170, 0.95);
   font-size: 0.78rem;
+}
+
+.widget-cached {
+  margin: 0;
+  align-self: flex-start;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+  color: rgba(233, 245, 255, 0.96);
+  border: 1px solid rgba(148, 204, 255, 0.45);
+  background: rgba(148, 204, 255, 0.16);
+}
+
+.widget-offline {
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: grid;
+  gap: 4px;
+}
+
+.widget-offline__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.widget-offline__text {
+  margin: 0;
+  font-size: 0.76rem;
+  opacity: 0.78;
+}
+
+.widget-offline--weather {
+  border-color: rgba(125, 211, 252, 0.45);
+  background: linear-gradient(165deg, rgba(125, 211, 252, 0.12), rgba(15, 23, 42, 0.12));
+}
+
+.widget-offline--rss {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: linear-gradient(165deg, rgba(251, 191, 36, 0.14), rgba(15, 23, 42, 0.12));
 }
 
 .widget-weather__main {
@@ -256,6 +323,223 @@
 
 .widget-clock-analog__center {
   fill: rgba(255, 255, 255, 0.95);
+}
+
+.widget-notes__text {
+  margin: 0;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  color: rgba(250, 253, 255, 0.94);
+}
+
+.widget-calculator__display {
+  min-height: 42px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.widget-calculator__display--error {
+  color: rgba(255, 145, 145, 0.95);
+}
+
+.widget-calculator__keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.widget-calculator__key {
+  min-height: 30px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.widget-calculator__key:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.widget-calculator__key--solve {
+  background: rgba(99, 179, 237, 0.3);
+  border-color: rgba(99, 179, 237, 0.52);
+}
+
+.widget-calculator__key--solve:hover {
+  background: rgba(99, 179, 237, 0.46);
+}
+
+.widget-calendar__header {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  gap: 6px;
+}
+
+.widget-calendar__title {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.widget-calendar__nav {
+  min-height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  cursor: pointer;
+}
+
+.widget-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.widget-calendar__label {
+  text-align: center;
+  font-size: 0.64rem;
+  opacity: 0.65;
+  font-weight: 600;
+}
+
+.widget-calendar__cell {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.72rem;
+}
+
+.widget-calendar__cell--today {
+  background: rgba(99, 179, 237, 0.35);
+  border: 1px solid rgba(99, 179, 237, 0.64);
+}
+
+.widget-calendar__cell--empty {
+  background: transparent;
+}
+
+.widget-todo__composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+}
+
+.widget-todo__input {
+  min-height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 0 8px;
+  font-size: 0.8rem;
+}
+
+.widget-todo__add {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(99, 179, 237, 0.52);
+  background: rgba(99, 179, 237, 0.3);
+  color: inherit;
+  cursor: pointer;
+}
+
+.widget-todo__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.widget-todo__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.widget-todo__item label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.widget-todo__item--done span {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.widget-todo__delete {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 150, 150, 0.94);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.widget-stock__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.widget-stock__item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.77rem;
+}
+
+.widget-stock__symbol {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.widget-stock__price {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.widget-stock__change--up {
+  color: rgba(155, 245, 190, 0.95);
+}
+
+.widget-stock__change--down {
+  color: rgba(255, 165, 165, 0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .widget--fade-in.widget--loaded {
+    transition: none;
+  }
+
+  .panel--dragging {
+    transform: none;
+  }
 }
 
 @media (max-width: 640px) {

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Panel as PanelType } from '../../types';
 import type { Action } from '../../store/reducer';
 import type { Dispatch } from 'react';
@@ -55,6 +55,7 @@ export function Panel({
 }: PanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const activeGestureRef = useRef<ActiveGesture | null>(null);
+  const [activeKind, setActiveKind] = useState<GestureKind | null>(null);
 
   const showTitle = panel.showTitle ?? true;
   const showHeader = isEdit || showTitle;
@@ -84,6 +85,7 @@ export function Panel({
         startY: e.clientY,
         start,
       };
+      setActiveKind(kind);
       onSelect();
     },
     [isEdit, onSelect, start]
@@ -95,6 +97,7 @@ export function Panel({
       panelElement.releasePointerCapture(pointerId);
     }
     activeGestureRef.current = null;
+    setActiveKind(null);
   }, []);
 
   const handlePointerMove = useCallback(
@@ -137,6 +140,12 @@ export function Panel({
     color: panel.style.textColor,
   };
 
+  const handleDeletePanel = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dispatch({ type: 'DELETE_PANEL', payload: { id: panel.id } });
+  }, [dispatch, panel.id]);
+
   return (
     <div
       ref={panelRef}
@@ -144,6 +153,8 @@ export function Panel({
         'panel',
         isEdit ? 'panel--edit' : '',
         isSelected ? 'panel--selected' : '',
+        activeKind === 'move' ? 'panel--dragging' : '',
+        activeKind === 'resize' ? 'panel--resizing' : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -165,10 +176,12 @@ export function Panel({
           {isEdit && (
             <button
               className="panel__btn-delete"
-              onClick={(e) => {
+              onPointerDown={(e) => {
+                // Keep delete taps/clicks from starting panel drag on the header.
+                e.preventDefault();
                 e.stopPropagation();
-                dispatch({ type: 'DELETE_PANEL', payload: { id: panel.id } });
               }}
+              onClick={handleDeletePanel}
               title="Delete panel"
               aria-label="Delete panel"
             >
@@ -220,7 +233,7 @@ export function Panel({
           )}
         </div>
       ) : (
-        <WidgetContent panel={panel} isEdit={isEdit} />
+        <WidgetContent panel={panel} isEdit={isEdit} dispatch={dispatch} />
       )}
     </div>
   );

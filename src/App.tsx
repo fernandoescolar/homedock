@@ -13,6 +13,10 @@ import { Toolbar } from './components/Toolbar/Toolbar';
 import { Panel, type PanelResizeEdge } from './components/Panel/Panel';
 import { PanelEditor } from './components/Editor/PanelEditor';
 import { BackgroundEditor } from './components/Editor/BackgroundEditor';
+import { LinkSearchOverlay } from './components/LinkSearchOverlay/LinkSearchOverlay';
+import { AboutHelp } from './components/Help/AboutHelp';
+import { collectSearchableLinks } from './utils/search';
+import { createShareUrl, parseUrlState } from './utils/urlState';
 import { DEFAULT_BACKGROUND } from './store/reducer';
 import './App.css';
 
@@ -41,9 +45,18 @@ export function App() {
   const { state, canUndo, canRedo, dispatch } = useAppStore();
   const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null);
   const [isBackgroundEditorOpen, setIsBackgroundEditorOpen] = useState(false);
+  const [isQuickSearchOpen, setIsQuickSearchOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [globalNotice, setGlobalNotice] = useState<string | null>(null);
   const [importPreview, setImportPreview] = useState<ImportPreviewState | null>(null);
+  const [isImportSourceOpen, setIsImportSourceOpen] = useState(false);
+  const [importUrlValue, setImportUrlValue] = useState('');
+  const [isImportingUrl, setIsImportingUrl] = useState(false);
+  const initializedUrlLoadRef = useRef(false);
+  const importDialogRef = useRef<HTMLDivElement>(null);
+  const importSourceDialogRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLElement>(null);
 
   const isEdit = state.mode === 'edit';
   const selectedPanel =
@@ -61,6 +74,22 @@ export function App() {
       .map((item) => item.panel);
   }, [state.panels]);
 
+  const searchableLinks = useMemo(
+    () => collectSearchableLinks(state.panels),
+    [state.panels]
+  );
+
+  function isTextEditingTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    const tag = target.tagName.toLowerCase();
+    return (
+      tag === 'input' ||
+      tag === 'textarea' ||
+      target.isContentEditable ||
+      target.closest('[contenteditable="true"]') !== null
+    );
+  }
+
   // ── Mode ───────────────────────────────────────────────────
   function handleToggleMode() {
     const next = isEdit ? 'view' : 'edit';
@@ -68,6 +97,9 @@ export function App() {
     if (next === 'view') {
       setSelectedPanelId(null);
       setIsBackgroundEditorOpen(false);
+      setIsHelpOpen(false);
+      setIsImportSourceOpen(false);
+      setImportUrlValue('');
     }
   }
 
@@ -90,9 +122,78 @@ export function App() {
     URL.revokeObjectURL(url);
   }
 
+  async function handleShareUrl() {
+    const shareUrl = createShareUrl(state);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setGlobalNotice('Share URL copied to clipboard.');
+    } catch {
+      window.prompt('Copy this URL', shareUrl);
+      setGlobalNotice('Share URL ready to copy.');
+    }
+  }
+
   // ── Import ─────────────────────────────────────────────────
   function handleImportClick() {
+    setIsImportSourceOpen(true);
+  }
+
+  function openFileImportPicker() {
+    setIsImportSourceOpen(false);
     fileInputRef.current?.click();
+  }
+
+  function buildImportPreview(data: unknown, sourceName: string): ImportPreviewState {
+    const result = validateExportSchema(data);
+
+    const panels = result.valid ? (data as ExportSchema).panels : [];
+    const nextBackground =
+      result.valid &&
+      typeof (data as Record<string, unknown>).background === 'object' &&
+      (data as Record<string, unknown>).background
+        ? {
+            ...DEFAULT_BACKGROUND,
+            ...((data as ExportSchema).background ?? {}),
+          }
+        : DEFAULT_BACKGROUND;
+    const collisions = result.valid
+      ? analyzePanelsForCollisions(panels)
+      : [];
+
+    return {
+      fileName: sourceName,
+      panels,
+      background: nextBackground,
+      errors: result.errors,
+      collisions,
+    };
+  }
+
+  async function handleImportFromUrl() {
+    const trimmedUrl = importUrlValue.trim();
+    if (!/^https?:\/\//i.test(trimmedUrl)) {
+      setGlobalNotice('Import URL must start with http:// or https://.');
+      return;
+    }
+
+    setIsImportingUrl(true);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const response = await fetch(trimmedUrl, { signal: controller.signal });
+      if (!response.ok) throw new Error('Request failed');
+
+      const raw = await response.json();
+      setImportPreview(buildImportPreview(raw, trimmedUrl));
+      setIsImportSourceOpen(false);
+      setImportUrlValue('');
+    } catch {
+      setGlobalNotice('Could not import from URL.');
+    } finally {
+      window.clearTimeout(timeout);
+      setIsImportingUrl(false);
+    }
   }
 
   function closeImportPreview() {
@@ -111,7 +212,8 @@ export function App() {
     dispatch({
       type: 'SET_BACKGROUND',
       payload: importPreview.background,
-    });    closeImportPreview();
+    });
+    closeImportPreview();
   }
 
   const handleFileChange = useCallback(
@@ -125,28 +227,7 @@ export function App() {
           const raw = ev.target?.result;
           if (typeof raw !== 'string') return;
           const data: unknown = JSON.parse(raw);
-          const result = validateExportSchema(data);
-
-          const panels = result.valid ? (data as ExportSchema).panels : [];
-          const nextBackground =
-            result.valid &&
-            typeof (data as Record<string, unknown>).background === 'object' &&
-            (data as Record<string, unknown>).background
-              ? {
-                  ...DEFAULT_BACKGROUND,
-                  ...((data as ExportSchema).background ?? {}),
-                }
-              : DEFAULT_BACKGROUND;
-          const collisions = result.valid
-            ? analyzePanelsForCollisions(panels)
-            : [];
-          setImportPreview({
-            fileName: file.name,
-            panels,
-            background: nextBackground,
-            errors: result.errors,
-            collisions,
-          });
+          setImportPreview(buildImportPreview(data, file.name));
         } catch {
           setImportPreview({
             fileName: file.name,
@@ -163,8 +244,56 @@ export function App() {
       };
       reader.readAsText(file);
     },
-    [dispatch]
+    []
   );
+
+  useEffect(() => {
+    if (initializedUrlLoadRef.current) return;
+    initializedUrlLoadRef.current = true;
+
+    const { configState, importUrl } = parseUrlState(window.location.search);
+
+    if (configState) {
+      dispatch({ type: 'IMPORT_PANELS', payload: configState.panels });
+      dispatch({ type: 'SET_BACKGROUND', payload: configState.background });
+      setGlobalNotice('Dashboard loaded from URL configuration.');
+      return;
+    }
+
+    if (!importUrl) return;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
+    fetch(importUrl, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error('Request failed');
+        return res.json();
+      })
+      .then((raw) => {
+        const validation = validateExportSchema(raw);
+        if (!validation.valid) {
+          setGlobalNotice('Import URL is invalid. Falling back to local dashboard.');
+          return;
+        }
+
+        const data = raw as ExportSchema;
+        dispatch({ type: 'IMPORT_PANELS', payload: data.panels });
+        dispatch({ type: 'SET_BACKGROUND', payload: data.background });
+        setGlobalNotice('Dashboard imported from remote URL.');
+      })
+      .catch(() => {
+        setGlobalNotice('Could not load import URL. Using local dashboard.');
+      })
+      .finally(() => {
+        window.clearTimeout(timeout);
+      });
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!globalNotice) return;
+    const timer = window.setTimeout(() => setGlobalNotice(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, [globalNotice]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -197,19 +326,95 @@ export function App() {
   }, [dispatch, state.mode]);
 
   useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const isMeta = e.metaKey || e.ctrlKey;
+      if (!isMeta || e.key.toLowerCase() !== 'k') return;
+      if (isTextEditingTarget(e.target)) return;
+      e.preventDefault();
+      setIsQuickSearchOpen(true);
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!isImportSourceOpen) return;
+
+    const dialog = importSourceDialogRef.current;
+    if (!dialog) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable[0]?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsImportSourceOpen(false);
+        return;
+      }
+
+      if (e.key === 'Tab' && focusable.length > 0) {
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      previous?.focus();
+    };
+  }, [isImportSourceOpen]);
+
+  useEffect(() => {
     if (!importPreview) return;
+
+    const dialog = importDialogRef.current;
+    if (!dialog) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable[0]?.focus();
+
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         e.preventDefault();
         closeImportPreview();
+        return;
+      }
+
+      if (e.key === 'Tab' && focusable.length > 0) {
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      previous?.focus();
+    };
   }, [importPreview]);
 
   // ── Panel canvas click (deselect) ──────────────────────────
-  function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
+  function handleCanvasClick(e: React.MouseEvent<HTMLElement>) {
     if ((e.target as HTMLElement).classList.contains('canvas')) {
       setSelectedPanelId(null);
     }
@@ -344,6 +549,9 @@ export function App() {
 
   return (
     <div className={`app ${isEdit ? 'app--edit' : 'app--view'}`}>
+      <a href="#canvas-main" className="app__skip-link">
+        Skip to dashboard content
+      </a>
       <Background config={state.background} />
 
       {/* Hidden file input for import */}
@@ -354,6 +562,7 @@ export function App() {
         style={{ display: 'none' }}
         onChange={handleFileChange}
         aria-hidden="true"
+        tabIndex={-1}
       />
 
       {/* Toolbar — visible only in edit mode */}
@@ -372,11 +581,21 @@ export function App() {
           }}
           onUndo={() => dispatch({ type: 'UNDO' })}
           onRedo={() => dispatch({ type: 'REDO' })}
+          onOpenQuickSearch={() => setIsQuickSearchOpen(true)}
+          onShareUrl={handleShareUrl}
+          onOpenHelp={() => setIsHelpOpen(true)}
         />
       )}
 
+      {globalNotice && (
+        <div className="app__notice" aria-live="polite">
+          {globalNotice}
+        </div>
+      )}
+
       {/* Canvas — panels live here as grid items */}
-      <div
+      <main
+        id="canvas-main"
         ref={canvasRef}
         className={[
           'canvas',
@@ -409,7 +628,13 @@ export function App() {
             <p>No panels yet.</p>
           </div>
         )}
-      </div>
+      </main>
+
+      {isQuickSearchOpen && (
+        <LinkSearchOverlay links={searchableLinks} onClose={() => setIsQuickSearchOpen(false)} />
+      )}
+
+      {isEdit && isHelpOpen && <AboutHelp onClose={() => setIsHelpOpen(false)} />}
 
       {!isEdit && (
         <button
@@ -440,6 +665,68 @@ export function App() {
         />
       )}
 
+      {isImportSourceOpen && (
+        <div
+          className="import-source"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="import-source-title"
+        >
+          <button
+            type="button"
+            className="import-source__backdrop"
+            onClick={() => setIsImportSourceOpen(false)}
+            aria-label="Close import source selector"
+          />
+          <div className="import-source__card" ref={importSourceDialogRef}>
+            <h2 id="import-source-title" className="import-source__title">Import dashboard</h2>
+            <p className="import-source__meta">
+              Choose whether to import your Homedock configuration from a JSON file or a direct URL.
+            </p>
+
+            <div className="import-source__actions">
+              <button
+                type="button"
+                className="toolbar__btn toolbar__btn--primary"
+                onClick={openFileImportPicker}
+              >
+                Choose file
+              </button>
+
+              <div className="import-source__url-row">
+                <input
+                  type="url"
+                  className="import-source__url-input"
+                  value={importUrlValue}
+                  onChange={(e) => setImportUrlValue(e.target.value)}
+                  placeholder="https://example.com/homedock.json"
+                  aria-label="Import URL"
+                />
+                <button
+                  type="button"
+                  className="toolbar__btn"
+                  onClick={handleImportFromUrl}
+                  disabled={isImportingUrl || importUrlValue.trim().length === 0}
+                >
+                  {isImportingUrl ? 'Importing…' : 'Import URL'}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="toolbar__btn"
+                onClick={() => {
+                  setIsImportSourceOpen(false);
+                  setImportUrlValue('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {importPreview && (
         <div
           className="import-preview"
@@ -448,7 +735,7 @@ export function App() {
           aria-labelledby="import-preview-title"
         >
           <div className="import-preview__backdrop" onClick={closeImportPreview} />
-          <div className="import-preview__card">
+          <div className="import-preview__card" ref={importDialogRef}>
             <h2 id="import-preview-title" className="import-preview__title">Import preview</h2>
             <p className="import-preview__meta">File: {importPreview.fileName}</p>
             <p className="import-preview__meta">

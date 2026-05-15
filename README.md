@@ -21,10 +21,17 @@ Current status: active and functional for daily use.
 Implemented:
 
 - Grid-based panel system with collision-safe editing
+- Drag and drop panel movement + edge-based resize handles in edit mode
+- Quick delete from each panel header (X button in edit mode)
 - Undo/redo in edit mode
 - View/Edit mode toggle with responsive toolbar behavior
+- Adaptive toolbar with overflow "More" menu on small screens
 - Import/export (JSON schema v1) with validation and collision checks
+- Import source chooser (JSON file or remote URL)
+- Shareable dashboard URLs (load from query state and copy share link)
 - LocalStorage persistence with migration support
+- Help/About panel integrated in edit mode
+- Quick link search overlay (Cmd/Ctrl + K)
 - Configurable global background:
   - daily photo (deterministic per date)
   - solid color
@@ -33,11 +40,30 @@ Implemented:
 - Widgets:
   - Links (list and uniform grid display with favicon preview)
   - Clock (digital/analog, timezone, optional timezone label, digital text size)
+  - Digital clock hour format: automatic locale / 24-hour / 12-hour
   - Weather (fixed coordinates or device geolocation, weather code icon + label, wind)
   - RSS feed reader
+  - Notes
+  - Calculator
+  - Calendar
+  - TODO list
+  - Stock ticker (demo values for rapid prototyping)
+- Widget UX enhancements:
+  - smooth loading/fade-in transitions
+  - per-widget offline fallback messages (weather/rss)
+  - cached data indicator when offline but data is available
+- Appearance presets:
+  - panel style templates (e.g. Glass Light, Neon Outline, Paper Soft, Dense Contrast)
+  - template apply action + manual style fine-tuning
+- Offline and installability:
+  - service worker for app shell caching
+  - stale-while-revalidate strategy for weather/rss providers
+  - web app manifest and favicon integration
 - Mobile UX improvements:
   - one-column panel layout
   - panel order matches desktop visual order
+  - larger touch-friendly controls for toolbar and editors
+  - stable mobile overflow menu behavior
   - panel/background editor as bottom sheets
 
 ## Screenshots
@@ -106,11 +132,19 @@ Default container URL: `http://localhost:8080`
 
 1. Open Homedock in view mode.
 2. Switch to edit mode from the toolbar.
-3. Add a panel, then click it to open the panel editor.
+3. Add a panel, then click it (or the floating gear button) to open the panel editor.
 4. Configure widget type, layout, style, and data sources.
-5. Optional: open Background settings (in edit mode) to choose photo/color/gradient/fixed image.
-6. Export your configuration to JSON.
-7. Import a previous JSON export when needed.
+5. Optional: apply a style template, then fine-tune opacity, blur, radius, and colors.
+6. Optional: open Background settings (in edit mode) to choose photo/color/gradient/fixed image.
+7. Use quick search with Cmd/Ctrl + K to launch saved links fast.
+8. Share your current layout with a URL, or import from file/URL.
+9. Export your configuration to JSON and re-import when needed.
+
+## Keyboard shortcuts
+
+- Cmd/Ctrl + K: open quick link search
+- Cmd/Ctrl + Z: undo (edit mode)
+- Cmd/Ctrl + Shift + Z or Cmd/Ctrl + Y: redo (edit mode)
 
 ## Export schema (v1)
 

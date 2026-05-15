@@ -11,6 +11,7 @@ interface BackgroundEditorProps {
 export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const idPrefix = 'background-editor';
 
   function handlePickImage() {
     fileInputRef.current?.click();
@@ -53,7 +54,7 @@ export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEd
       <div className="be-header">
         <h2 className="be-header__title">Background</h2>
         <button className="be-header__close" onClick={onClose} aria-label="Close background settings">
-          x
+          ×
         </button>
       </div>
 
@@ -98,10 +99,12 @@ export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEd
             <label className="be-field">
               <span className="be-field__label">Background color</span>
               <input
+                id={`${idPrefix}-solid-color`}
                 type="color"
                 className="be-color"
                 value={background.solidColor}
                 onChange={(e) => onUpdate({ solidColor: e.target.value })}
+                aria-label="Background color"
               />
             </label>
           </section>
@@ -114,25 +117,30 @@ export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEd
               <label className="be-field">
                 <span className="be-field__label">From</span>
                 <input
+                  id={`${idPrefix}-gradient-from`}
                   type="color"
                   className="be-color"
                   value={background.gradientFrom}
                   onChange={(e) => onUpdate({ gradientFrom: e.target.value })}
+                  aria-label="Gradient from color"
                 />
               </label>
               <label className="be-field">
                 <span className="be-field__label">To</span>
                 <input
+                  id={`${idPrefix}-gradient-to`}
                   type="color"
                   className="be-color"
                   value={background.gradientTo}
                   onChange={(e) => onUpdate({ gradientTo: e.target.value })}
+                  aria-label="Gradient to color"
                 />
               </label>
             </div>
             <label className="be-field">
               <span className="be-field__label">Angle: {Math.round(background.gradientAngle)} deg</span>
               <input
+                id={`${idPrefix}-gradient-angle`}
                 className="be-range"
                 type="range"
                 min={0}
@@ -140,6 +148,7 @@ export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEd
                 step={1}
                 value={background.gradientAngle}
                 onChange={(e) => onUpdate({ gradientAngle: Number(e.target.value) })}
+                aria-label="Gradient angle"
               />
             </label>
           </section>
@@ -154,6 +163,8 @@ export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEd
               accept="image/*"
               onChange={handleImageSelected}
               style={{ display: 'none' }}
+              aria-hidden="true"
+              tabIndex={-1}
             />
             <button type="button" className="be-btn" onClick={handlePickImage}>
               Upload image
@@ -170,7 +181,11 @@ export function BackgroundEditor({ background, onUpdate, onClose }: BackgroundEd
                 </button>
               </>
             )}
-            {uploadError && <p className="be-note be-note--error">{uploadError}</p>}
+            {uploadError && (
+              <p className="be-note be-note--error" role="status" aria-live="polite">
+                {uploadError}
+              </p>
+            )}
           </section>
         )}
       </div>

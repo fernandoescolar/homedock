@@ -90,9 +90,14 @@ function validateWidgetConfig(panel: Record<string, unknown>, prefix: string): s
     widgetType !== 'links' &&
     widgetType !== 'clock' &&
     widgetType !== 'weather' &&
-    widgetType !== 'rss'
+    widgetType !== 'rss' &&
+    widgetType !== 'notes' &&
+    widgetType !== 'calculator' &&
+    widgetType !== 'calendar' &&
+    widgetType !== 'todo' &&
+    widgetType !== 'stock'
   ) {
-    errors.push(`${prefix}.widgetType must be 'links', 'clock', 'weather', or 'rss'`);
+    errors.push(`${prefix}.widgetType must be 'links', 'clock', 'weather', 'rss', 'notes', 'calculator', 'calendar', 'todo', or 'stock'`);
     return errors;
   }
 
@@ -114,6 +119,14 @@ function validateWidgetConfig(panel: Record<string, unknown>, prefix: string): s
     }
     if (clock.timeZone !== undefined && !isString(clock.timeZone)) {
       errors.push(`${prefix}.widgetConfig.clock.timeZone must be a string`);
+    }
+    if (
+      clock.hourFormat !== undefined &&
+      clock.hourFormat !== 'auto' &&
+      clock.hourFormat !== '24h' &&
+      clock.hourFormat !== '12h'
+    ) {
+      errors.push(`${prefix}.widgetConfig.clock.hourFormat must be 'auto', '24h', or '12h'`);
     }
   }
 
@@ -137,6 +150,78 @@ function validateWidgetConfig(panel: Record<string, unknown>, prefix: string): s
     }
     if (rss.maxItems !== undefined && !isNumber(rss.maxItems)) {
       errors.push(`${prefix}.widgetConfig.rss.maxItems must be a number`);
+    }
+  }
+
+  if (widgetType === 'notes') {
+    const notes = (cfg.notes as Record<string, unknown>) ?? {};
+    if (notes.text !== undefined && !isString(notes.text)) {
+      errors.push(`${prefix}.widgetConfig.notes.text must be a string`);
+    }
+    if (notes.fontSize !== undefined && !isNumber(notes.fontSize)) {
+      errors.push(`${prefix}.widgetConfig.notes.fontSize must be a number`);
+    }
+  }
+
+  if (widgetType === 'calculator') {
+    const calculator = (cfg.calculator as Record<string, unknown>) ?? {};
+    if (calculator.precision !== undefined && !isNumber(calculator.precision)) {
+      errors.push(`${prefix}.widgetConfig.calculator.precision must be a number`);
+    }
+  }
+
+  if (widgetType === 'calendar') {
+    const calendar = (cfg.calendar as Record<string, unknown>) ?? {};
+    if (calendar.weekStartsOnMonday !== undefined && !isBoolean(calendar.weekStartsOnMonday)) {
+      errors.push(`${prefix}.widgetConfig.calendar.weekStartsOnMonday must be a boolean`);
+    }
+    if (calendar.locale !== undefined && !isString(calendar.locale)) {
+      errors.push(`${prefix}.widgetConfig.calendar.locale must be a string`);
+    }
+  }
+
+  if (widgetType === 'todo') {
+    const todo = (cfg.todo as Record<string, unknown>) ?? {};
+    if (todo.showCompleted !== undefined && !isBoolean(todo.showCompleted)) {
+      errors.push(`${prefix}.widgetConfig.todo.showCompleted must be a boolean`);
+    }
+    if (todo.items !== undefined && !Array.isArray(todo.items)) {
+      errors.push(`${prefix}.widgetConfig.todo.items must be an array`);
+    }
+    if (Array.isArray(todo.items)) {
+      todo.items.forEach((item, index) => {
+        if (!item || typeof item !== 'object') {
+          errors.push(`${prefix}.widgetConfig.todo.items[${index}] must be an object`);
+          return;
+        }
+        const candidate = item as Record<string, unknown>;
+        if (!isString(candidate.id)) {
+          errors.push(`${prefix}.widgetConfig.todo.items[${index}].id must be a string`);
+        }
+        if (!isString(candidate.text)) {
+          errors.push(`${prefix}.widgetConfig.todo.items[${index}].text must be a string`);
+        }
+        if (!isBoolean(candidate.completed)) {
+          errors.push(`${prefix}.widgetConfig.todo.items[${index}].completed must be a boolean`);
+        }
+      });
+    }
+  }
+
+  if (widgetType === 'stock') {
+    const stock = (cfg.stock as Record<string, unknown>) ?? {};
+    if (stock.symbols !== undefined && !Array.isArray(stock.symbols)) {
+      errors.push(`${prefix}.widgetConfig.stock.symbols must be an array`);
+    }
+    if (Array.isArray(stock.symbols)) {
+      stock.symbols.forEach((symbol, index) => {
+        if (!isString(symbol)) {
+          errors.push(`${prefix}.widgetConfig.stock.symbols[${index}] must be a string`);
+        }
+      });
+    }
+    if (stock.refreshIntervalMinutes !== undefined && !isNumber(stock.refreshIntervalMinutes)) {
+      errors.push(`${prefix}.widgetConfig.stock.refreshIntervalMinutes must be a number`);
     }
   }
 
